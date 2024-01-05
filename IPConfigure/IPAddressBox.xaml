@@ -1,0 +1,46 @@
+﻿<UserControl x:Class="NetworkToolBox.IPAddressBox"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:NetworkToolBox"
+             mc:Ignorable="d" 
+             Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
+             BorderThickness="1"
+             BorderBrush="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"
+             d:DesignHeight="20" d:DesignWidth="100">
+    <UserControl.Resources>
+        <Style TargetType="local:ByteBox">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="local:ByteBox">
+                        <ScrollViewer x:Name="PART_ContentHost"/>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Foreground" Value="DarkGray"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <local:ByteBox x:Name="oct1" Grid.Column="0" MaxLength="3" TextAlignment="Center"></local:ByteBox>
+        <local:ByteBox x:Name="oct2" Grid.Column="2" MaxLength="3" TextAlignment="Center"></local:ByteBox>
+        <local:ByteBox x:Name="oct3" Grid.Column="4" MaxLength="3" TextAlignment="Center"></local:ByteBox>
+        <local:ByteBox x:Name="oct4" Grid.Column="6" MaxLength="3" TextAlignment="Center"></local:ByteBox>
+        <TextBlock Grid.Column="1" TextAlignment="Center">.</TextBlock>
+        <TextBlock Grid.Column="3" TextAlignment="Center">.</TextBlock>
+        <TextBlock Grid.Column="5" TextAlignment="Center">.</TextBlock>
+    </Grid>
+</UserControl>

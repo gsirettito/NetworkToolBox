@@ -1,0 +1,283 @@
+﻿<Window x:Name="window" x:Class="NetworkToolBox.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:NetworkToolBox"
+        xmlns:Converters="clr-namespace:SiretT.Converters"
+        xmlns:fonts="clr-namespace:SiretT.Fonts"
+        mc:Ignorable="d"
+        Icon="icon.ico"
+        Title="NetworkSet" Height="550" Width="450" MinHeight="550" MinWidth="450">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <Converters:EqualsToFalseConverter x:Key="EqualsToFalseConverter"/>
+        <Converters:NetworkOperationalStatusToVisibilityConverter x:Key="NetworkOperationalStatusToVisibilityConverter"/>
+        <ContextMenu x:Key="ContainerContextMenu" Focusable="False">
+            <MenuItem Header="Expand" Focusable="False" Click="expand_MenuItem_Click">
+                <MenuItem.Visibility>
+                    <Binding Path="IsExpanded" ConverterParameter="True">
+                        <Binding.Converter>
+                            <Converters:BooleanToVisibilityPipeConverter>
+                                <Converters:BooleanToVisibilityPipeConverter.PipeConverter>
+                                    <Converters:EqualsToFalsePipeConverter/>
+                                </Converters:BooleanToVisibilityPipeConverter.PipeConverter>
+                            </Converters:BooleanToVisibilityPipeConverter>
+                        </Binding.Converter>
+                    </Binding>
+                </MenuItem.Visibility>
+            </MenuItem>
+            <MenuItem x:Name="collapse"
+                      Focusable="False"
+                      Visibility="{Binding IsExpanded, Converter={StaticResource BooleanToVisibilityConverter}}" 
+                      Click="expand_MenuItem_Click">
+                <MenuItem.Style>
+                    <Style TargetType="MenuItem">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsExpanded}" Value="true">
+                                <Setter Property="Header" Value="Collapse"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsExpanded}" Value="false">
+                                <Setter Property="Header" Value="Expand"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </MenuItem.Style>
+            </MenuItem>
+            <MenuItem Header="Add folder" Focusable="False" Click="addFolder_MenuItem_Click"/>
+            <MenuItem Header="Add Profile" Focusable="False" Click="add_MenuItem_Click"/>
+            <MenuItem Header="Rename" Focusable="False" Click="rename_MenuItem_Click"/>
+            <MenuItem Header="Edit" Focusable="False" Click="edit1_MenuItem_Click"/>
+            <MenuItem Header="Remove" Focusable="False" Click="remove_MenuItem_Click"/>
+            <!--<MenuItem Header="{Binding IsExpanded}" Focusable="False" Click="edit1_MenuItem_Click"/>-->
+        </ContextMenu>
+
+        <ContextMenu x:Key="ConnectionContextMenu" Focusable="False">
+            <MenuItem Header="Copy host" Focusable="False" Click="copyHost_MenuItem_Click"/>
+            <MenuItem Header="Rename" Focusable="False" Click="rename_MenuItem_Click"/>
+            <MenuItem Header="Edit" Focusable="False" Click="edit_MenuItem_Click"/>
+            <MenuItem Header="Remove" Focusable="False" Click="remove_MenuItem_Click"/>
+        </ContextMenu>
+
+        <Style x:Key="{x:Type TextBlock}" TargetType="{x:Type TextBlock}">
+            <Style.Triggers>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Foreground" Value="DarkGray"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <DataTemplate x:Key="TreeViewItemContainerTemplate">
+            <Grid Background="Transparent"
+                  ContextMenu="{StaticResource ContainerContextMenu}"
+                  MouseEnter="Grid_MouseEnter"
+                  MouseLeftButtonDown="Tvi_MouseLeftButtonDown"
+                  MouseLeftButtonUp="Tvi_MouseLeftButtonUp">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Image Width="16" Height="16"
+                                       RenderOptions.BitmapScalingMode="NearestNeighbor"
+                                       Stretch="Uniform"
+                                       SnapsToDevicePixels="True" Source="res/folder1.png"/>
+                <TextBlock Text="{Binding Name}" Grid.Column="1" Margin="2,0"/>
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="TreeViewItemRenameContainerTemplate">
+            <Grid Background="Transparent">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Image Width="16" Height="16"
+                                       RenderOptions.BitmapScalingMode="NearestNeighbor"
+                                       Stretch="Uniform"
+                                       SnapsToDevicePixels="True" Source="res/folder1.png"/>
+                <TextBox x:Name="renameContainer" Text="{Binding Name}"
+                         MinWidth="60"
+                         MaxWidth="120"
+                         Grid.Column="1"
+                         Margin="2,0"
+                         GotFocus="renameContainer_GotFocus"
+                         LostFocus="renameContainer_LostFocus"
+                         KeyDown="renameContainer_KeyDown"
+                         Loaded="renameContainer_Loaded"/>
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="TreeViewItemConnectionTemplate">
+            <Grid Background="Transparent"
+                  ContextMenu="{StaticResource ConnectionContextMenu}"
+                  MouseEnter="Grid_MouseEnter"
+                  MouseLeftButtonDown="Tvi_MouseLeftButtonDown"
+                  MouseLeftButtonUp="Tvi_MouseLeftButtonUp">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Image Width="16" Height="16"
+                                       RenderOptions.BitmapScalingMode="NearestNeighbor"
+                                       Stretch="Uniform"
+                                       SnapsToDevicePixels="True" Source="res/connect0.png"/>
+                <TextBlock Text="{Binding Name}" Grid.Column="1" Margin="2,0"/>
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="TreeViewItemRenameConnectionTemplate">
+            <Grid Background="Transparent">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Image Width="16" Height="16"
+                                       RenderOptions.BitmapScalingMode="NearestNeighbor"
+                                       Stretch="Uniform"
+                                       SnapsToDevicePixels="True" Source="res/connect0.png"/>
+                <TextBox x:Name="renameContainer" Text="{Binding Name}"
+                         MinWidth="60"
+                         MaxWidth="120"
+                         Grid.Column="1"
+                         Margin="2,0"
+                         GotFocus="renameContainer_GotFocus"
+                         LostFocus="renameContainer_LostFocus"
+                         KeyDown="renameContainer_KeyDown"
+                         Loaded="renameContainer_Loaded"/>
+            </Grid>
+        </DataTemplate>
+    </Window.Resources>
+    <Grid>
+        <DockPanel>
+            <StatusBar DockPanel.Dock="Bottom">
+                <TextBlock x:Name="infoText" Margin="5,0"/>
+            </StatusBar>
+            <ToolBar DockPanel.Dock="Top">
+                <Button Click="newBtn_Click" ToolTip="New profile">
+                    <fonts:FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xED0E;" />
+                </Button>
+                <Button Click="newFolderBtn_Click" ToolTip="New Folder">
+                    <fonts:FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8F4;" />
+                </Button>
+                <Button Click="saveBtn_Click" ToolTip="Save">
+                    <fonts:FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE74E;" />
+                </Button>
+                <Button Click="applyProfileBtn_Click" ToolTip="Apply"
+                        DataContext="{Binding ElementName=window, Mode=OneWay}"
+                        IsEnabled="{Binding IsAdministrator}">
+                    <fonts:FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xEE4A;" />
+                </Button>
+                <Button Click="exploreBtn_Click" ToolTip="Change adapter config">
+                    <fonts:FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE839;" />
+                </Button>
+                <Button Click="settingsBtn_Click" ToolTip="Settings">
+                    <fonts:FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE713;" />
+                </Button>
+                <Button Click="githubBtn_Click" ToolTip="Go to project">
+                    <fonts:FontAwesomeIcon Icon="fa-github" FontPack="Brands" />
+                </Button>
+                <ComboBox x:Name="ifaces" Width="150" SelectedIndex="0">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Name}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                <Button Click="refreshBtn_Click" ToolTip="Refresh">
+                    <fonts:FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE72C;" />
+                </Button>
+            </ToolBar>
+            <DockPanel x:Name="requireAdminMsg" Height="25" DockPanel.Dock="Top" Background="#FFFFFFEA" Visibility="{Binding IsChecked, Converter={StaticResource BooleanToVisibilityConverter}, ElementName=toggleButton}">
+                <ToggleButton x:Name="toggleButton" IsChecked="True" DockPanel.Dock="Right" Margin="5">
+                    <ToggleButton.Template>
+                        <ControlTemplate TargetType="ToggleButton">
+                            <Border SnapsToDevicePixels="True">
+                                <fonts:FontIcon x:Name="ficon"
+                                                FontFamily="Segoe Fluent Icons"
+                                                Glyph="&#xEB90;"
+                                                FontSize="14"
+                                                Foreground="OrangeRed"
+                                                VerticalContentAlignment="Center"
+                                                HorizontalContentAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                HorizontalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="ficon" Property="Foreground" Value="IndianRed"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </ToggleButton.Template>
+                </ToggleButton>
+                <TextBlock Margin="5 0" VerticalAlignment="Center">
+                    This app requires <Hyperlink ToolTip="Click here to run Administrator" Click="Hyperlink_Click">administrator</Hyperlink> permission to work.
+                </TextBlock>
+            </DockPanel>
+            <StackPanel x:Name="netPanel" DockPanel.Dock="Right" HorizontalAlignment="Stretch" Margin="5 0" Width="270">
+                <GroupBox Header="Interface info" MinHeight="190">
+                    <TextBox x:Name="info" IsReadOnly="True" AcceptsReturn="True" BorderThickness="0"/>
+                </GroupBox>
+
+                <RadioButton x:Name="ipAutoRadio" Margin="9 10 9 3" GroupName="ipGroup" Content="Automatically Set IP Address"/>
+                <GroupBox>
+                    <GroupBox.Header>
+                        <RadioButton x:Name="ipManRadio" GroupName="ipGroup" IsChecked="True" Content="Manually Set IP Address"/>
+                    </GroupBox.Header>
+                    <Grid Margin="5" IsEnabled="{Binding IsChecked, ElementName=ipManRadio}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="120"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Margin="0 1.5"><Run Text="IP Address:"/></TextBlock>
+                        <local:IPAddressBox x:Name="ip" Grid.Row="0" Grid.Column="1" Margin="0 1.5"/>
+                        <TextBlock Grid.Row="1" Margin="0 1.5"><Run Text="Subnet Mask:"/></TextBlock>
+                        <local:IPAddressBox x:Name="mask" Grid.Row="1" Grid.Column="1" Margin="0 1.5"/>
+                        <TextBlock Grid.Row="2" Margin="0 1.5"><Run Text="Gateway:"/></TextBlock>
+                        <local:IPAddressBox x:Name="gw" Grid.Row="2" Grid.Column="1" Margin="0 1.5"/>
+                    </Grid>
+                </GroupBox>
+
+                <RadioButton x:Name="dnsAutoRadio" Margin="9 10 9 3" GroupName="dnsGroup" Content="Automatically Set DNS Address"/>
+                <GroupBox>
+                    <GroupBox.Header>
+                        <RadioButton x:Name="dnsManRadio" GroupName="dnsGroup" IsChecked="True" Content="Manually Set DNS Address"/>
+                    </GroupBox.Header>
+                    <Grid Margin="5" IsEnabled="{Binding IsChecked, ElementName=dnsManRadio}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="120"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Margin="0 1.5"><Run Text="Prefered DNS Server:"/></TextBlock>
+                        <local:IPAddressBox x:Name="dns1" Grid.Row="0" Grid.Column="1" Margin="0 1.5"/>
+                        <TextBlock Grid.Row="1" Margin="0 1.5"><Run Text="Alternate DNS Server:"/></TextBlock>
+                        <local:IPAddressBox x:Name="dns2" Grid.Row="1" Grid.Column="1" Margin="0 1.5"/>
+                    </Grid>
+                </GroupBox>
+                <StackPanel>
+                    <Button x:Name="data" DataContext="{Binding ElementName=window, Mode=OneWay}" Margin="10"
+                            Click="applyFromEditBtn_Click"
+                            Content="Apply"
+                            IsEnabled="{Binding IsAdministrator}"/>
+                </StackPanel>
+            </StackPanel>
+            <GroupBox Header="Profiles">
+                <Grid>
+                    <TreeView x:Name="tree"
+                              PreviewKeyDown="tree_PreviewKeyDown"
+                              SelectedItemChanged="tree_SelectedItemChanged">
+                    </TreeView>
+                </Grid>
+            </GroupBox>
+        </DockPanel>
+    </Grid>
+</Window>
