@@ -1,6 +1,6 @@
 <div align="center">
   <img width="120" alt="NETworkManager Preview" src="https://github.com/gsirettito/NetworkToolBox/blob/main/Images/nettoolbox.png?raw=true" />
-  <h1>NetToolBox</h1>
+  <h1>NetworkToolBox</h1>
   <p>
     <b>A open source tool for managing networks!</b>
   </p>
