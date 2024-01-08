@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -80,7 +81,7 @@ namespace NetworkToolBox {
         private void NewSettingsFile() {
             Settings.Instance.WindowsState = WindowState.Normal;
             Settings.Instance.Height = 450;
-            Settings.Instance.Width = 550;
+            Settings.Instance.Width = 560;
             Settings.Instance.Save("settings.json");
         }
 
@@ -296,6 +297,43 @@ namespace NetworkToolBox {
             return $"{bytes} bps";
         }
 
+        private void findInTree(string text) {
+            var selecteds = findInTree(tree, text).ToList();
+            if (selecteds.Count == 0) return;
+            var index = selecteds.IndexOf(tree.SelectedItem as TreeViewItem);
+            if (index >= 0 && index < selecteds.Count - 1) index++;
+            else index = 0;
+            var it = selecteds[index];
+
+            if (it != null) {
+                var orig = it;
+                it.IsSelected = true;
+                var parent = it.Parent as TreeViewItem;
+                while (parent != null) {
+                    parent.IsExpanded = true;
+                    parent = parent.Parent as TreeViewItem;
+                    it = parent;
+                }
+                orig.BringIntoView();
+            }
+        }
+
+        private IEnumerable<TreeViewItem> findInTree(ItemsControl itemsControl, string str) {
+            if ((itemsControl is TreeViewItem) && (itemsControl as TreeViewItem).Header.ToString().Contains(str) && !((itemsControl as TreeViewItem).Header is Container)) {
+                yield return itemsControl as TreeViewItem;
+            }
+            foreach (ItemsControl i in itemsControl.Items) {
+                if (i is TreeViewItem && (i as TreeViewItem).Header.ToString().Contains(str) && !((i as TreeViewItem).Header is Container)) {
+                    yield return i as TreeViewItem;
+                } else {
+                    var selecteds = findInTree(i, str);
+                    foreach (var s in selecteds) {
+                        yield return s;
+                    }
+                }
+            }
+        }
+
         #endregion
 
         #region Rename Methods
@@ -454,10 +492,6 @@ namespace NetworkToolBox {
                 tvi.HeaderTemplate = FindResource("TreeViewItemRenameConnectionTemplate") as DataTemplate;
         }
 
-        private void edit1_MenuItem_Click(object sender, RoutedEventArgs e) {
-
-        }
-
         private void remove_MenuItem_Click(object sender, RoutedEventArgs e) {
             MenuItem mi = sender as MenuItem;
             var cmenu = (mi.Parent as ContextMenu);
@@ -525,11 +559,12 @@ namespace NetworkToolBox {
         }
 
         private void settingsBtn_Click(object sender, RoutedEventArgs e) {
-
+            if (File.Exists("settings.json"))
+                Process.Start("settings.json");
         }
 
         private void githubBtn_Click(object sender, RoutedEventArgs e) {
-            Process.Start("https://www.github.com/gsirettito/projects");
+            Process.Start("https://github.com/gsirettito/NetworkToolBox");
         }
 
         private void Hyperlink_Click(object sender, RoutedEventArgs e) {
@@ -556,6 +591,18 @@ namespace NetworkToolBox {
 
             GetAllNetworkInterfaces(Settings.Instance.StartupAdapter);
             netPanel.IsEnabled = true;
+        }
+
+        private void clearBtn_Click(object sender, RoutedEventArgs e) {
+            ip.IPAddress = "";
+            mask.IPAddress = "";
+            gw.IPAddress = "";
+            dns1.IPAddress = "";
+            dns2.IPAddress = "";
+        }
+
+        private void localizeBtn_Click(object sender, RoutedEventArgs e) {
+            findInTree(localizerTbx.Text);
         }
 
         #endregion
@@ -596,6 +643,7 @@ namespace NetworkToolBox {
         }
 
         private void tree_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e) {
+            if (tree.SelectedItem == null) return;
             var pn = (tree.SelectedItem as TreeViewItem).Header as ProfileNetwork;
             if (pn == null) return;
             ipManRadio.IsChecked = !pn.IPAuto;
@@ -621,6 +669,9 @@ namespace NetworkToolBox {
             infoText.Text = tvi.Header.ToString();
         }
 
+        private void localizerTbx_PreviewKeyDown(object sender, KeyEventArgs e) {
+            if (e.Key == Key.Enter) findInTree(localizerTbx.Text);
+        }
         #endregion
 
         #endregion

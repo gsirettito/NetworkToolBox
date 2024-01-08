@@ -156,7 +156,7 @@ namespace NetworkToolBox {
             }
 
             if (element is TreeViewItem && (element as TreeViewItem).Header is Container) {
-                if (_lastTvi != null && _lastTvi != _currentTvi) {
+                if (_lastTvi != null && _lastTvi != _currentTvi && !IsChild(_lastTvi)) {
                     _tviParent.Items.RemoveAt(_tviIndex);
                     _lastTvi.Items.Add(_currentTvi);
                     _currentTvi.IsSelected = true;
@@ -210,13 +210,23 @@ namespace NetworkToolBox {
                     _lastTvi.Background = Brushes.Transparent;
                 };
 
-                if (_tvi.Header is Container && _tvi != _currentTvi) {
+                if (_tvi.Header is Container && _tvi != _currentTvi && !IsChild(_tvi)) {
                     _tvi.BorderThickness = new Thickness(0, 0, 0, 2);
                     _tvi.BorderBrush = Brushes.Black;
                     _tvi.Background = Brushes.AliceBlue;
                 }
                 _lastTvi = _tvi;
             }
+        }
+
+        private bool IsChild(TreeViewItem tvi) {
+            var parent = tvi.Parent;
+            while (parent != null && parent != _currentTvi) {
+                parent = (parent as FrameworkElement).Parent;
+                if (parent == _currentTvi) return true;
+            }
+            if (parent == _currentTvi) return true;
+            return false;
         }
         #endregion
     }

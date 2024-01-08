@@ -161,6 +161,7 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+    <Resource Include="Segoe Fluent Icons.ttf" />
     <None Include="Styles\Themes\GeneratorParameters.json" />
   </ItemGroup>
   <ItemGroup>

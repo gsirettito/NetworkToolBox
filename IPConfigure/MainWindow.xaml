@@ -8,7 +8,7 @@
         xmlns:fonts="clr-namespace:SiretT.Fonts"
         mc:Ignorable="d"
         Icon="icon.ico"
-        Title="NetworkSet" Height="550" Width="450" MinHeight="550" MinWidth="450">
+        Title="NetworkSet - v1.1.0.0" Height="560" Width="450" MinHeight="560" MinWidth="450">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <Converters:EqualsToFalseConverter x:Key="EqualsToFalseConverter"/>
@@ -47,13 +47,10 @@
             <MenuItem Header="Add folder" Focusable="False" Click="addFolder_MenuItem_Click"/>
             <MenuItem Header="Add Profile" Focusable="False" Click="add_MenuItem_Click"/>
             <MenuItem Header="Rename" Focusable="False" Click="rename_MenuItem_Click"/>
-            <MenuItem Header="Edit" Focusable="False" Click="edit1_MenuItem_Click"/>
             <MenuItem Header="Remove" Focusable="False" Click="remove_MenuItem_Click"/>
-            <!--<MenuItem Header="{Binding IsExpanded}" Focusable="False" Click="edit1_MenuItem_Click"/>-->
         </ContextMenu>
 
         <ContextMenu x:Key="ConnectionContextMenu" Focusable="False">
-            <MenuItem Header="Copy host" Focusable="False" Click="copyHost_MenuItem_Click"/>
             <MenuItem Header="Rename" Focusable="False" Click="rename_MenuItem_Click"/>
             <MenuItem Header="Edit" Focusable="False" Click="edit_MenuItem_Click"/>
             <MenuItem Header="Remove" Focusable="False" Click="remove_MenuItem_Click"/>
@@ -146,6 +143,10 @@
                          Loaded="renameContainer_Loaded"/>
             </Grid>
         </DataTemplate>
+
+        <Style TargetType="fonts:FontIcon">
+            <Setter Property="FontFamily" Value="/NetworkSet;component/#Segoe Fluent Icons"/>
+        </Style>
     </Window.Resources>
     <Grid>
         <DockPanel>
@@ -154,24 +155,27 @@
             </StatusBar>
             <ToolBar DockPanel.Dock="Top">
                 <Button Click="newBtn_Click" ToolTip="New profile">
-                    <fonts:FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xED0E;" />
+                    <fonts:FontIcon Glyph="&#xED0E;" />
                 </Button>
                 <Button Click="newFolderBtn_Click" ToolTip="New Folder">
-                    <fonts:FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8F4;" />
+                    <fonts:FontIcon Glyph="&#xE8F4;" />
                 </Button>
                 <Button Click="saveBtn_Click" ToolTip="Save">
-                    <fonts:FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE74E;" />
+                    <fonts:FontIcon Glyph="&#xE74E;" />
+                </Button>
+                <Button Click="clearBtn_Click" ToolTip="Clear">
+                    <fonts:FontIcon Glyph="&#xEA99;" />
                 </Button>
                 <Button Click="applyProfileBtn_Click" ToolTip="Apply"
                         DataContext="{Binding ElementName=window, Mode=OneWay}"
                         IsEnabled="{Binding IsAdministrator}">
-                    <fonts:FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xEE4A;" />
+                    <fonts:FontIcon Glyph="&#xEE4A;" />
                 </Button>
                 <Button Click="exploreBtn_Click" ToolTip="Change adapter config">
-                    <fonts:FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE839;" />
+                    <fonts:FontIcon Glyph="&#xE839;" />
                 </Button>
                 <Button Click="settingsBtn_Click" ToolTip="Settings">
-                    <fonts:FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE713;" />
+                    <fonts:FontIcon Glyph="&#xE713;" />
                 </Button>
                 <Button Click="githubBtn_Click" ToolTip="Go to project">
                     <fonts:FontAwesomeIcon Icon="fa-github" FontPack="Brands" />
@@ -184,7 +188,7 @@
                     </ComboBox.ItemTemplate>
                 </ComboBox>
                 <Button Click="refreshBtn_Click" ToolTip="Refresh">
-                    <fonts:FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE72C;" />
+                    <fonts:FontIcon Glyph="&#xE72C;" />
                 </Button>
             </ToolBar>
             <DockPanel x:Name="requireAdminMsg" Height="25" DockPanel.Dock="Top" Background="#FFFFFFEA" Visibility="{Binding IsChecked, Converter={StaticResource BooleanToVisibilityConverter}, ElementName=toggleButton}">
@@ -263,20 +267,44 @@
                         <local:IPAddressBox x:Name="dns2" Grid.Row="1" Grid.Column="1" Margin="0 1.5"/>
                     </Grid>
                 </GroupBox>
-                <StackPanel>
-                    <Button x:Name="data" DataContext="{Binding ElementName=window, Mode=OneWay}" Margin="10"
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Button x:Name="clearBtn" DataContext="{Binding ElementName=window, Mode=OneWay}" Margin="10"
+                            Click="clearBtn_Click"
+                            Content="Clear"/>
+                    <Button Grid.Column="1" DataContext="{Binding ElementName=window, Mode=OneWay}" Margin="10"
                             Click="applyFromEditBtn_Click"
                             Content="Apply"
                             IsEnabled="{Binding IsAdministrator}"/>
-                </StackPanel>
+                </Grid>
             </StackPanel>
             <GroupBox Header="Profiles">
-                <Grid>
+                <DockPanel>
+                    <Grid DockPanel.Dock="Bottom">
+                        <TextBox x:Name="localizerTbx" DockPanel.Dock="Top"
+                                 Padding="0 0 19 0"
+                                 BorderBrush="#FFE3E3E3"
+                                 PreviewKeyDown="localizerTbx_PreviewKeyDown"/>
+                        <Button Click="localizeBtn_Click"
+                                ToolTip="Localize in tree"
+                                FontSize="14"
+                                Padding="2"
+                                HorizontalAlignment="Right"
+                                Background="White"
+                                Height="auto"
+                                BorderBrush="Transparent"
+                                BorderThickness="1 1 1 1">
+                            <fonts:FontIcon Glyph="&#xF78B;" />
+                        </Button>
+                    </Grid>
                     <TreeView x:Name="tree"
                               PreviewKeyDown="tree_PreviewKeyDown"
                               SelectedItemChanged="tree_SelectedItemChanged">
                     </TreeView>
-                </Grid>
+                </DockPanel>
             </GroupBox>
         </DockPanel>
     </Grid>
