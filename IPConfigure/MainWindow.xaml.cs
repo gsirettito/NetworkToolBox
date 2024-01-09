@@ -5,7 +5,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.NetworkInformation;
+using System.Net.Sockets;
 using System.Security.Principal;
 using System.Threading;
 using System.Windows;
@@ -259,7 +261,10 @@ namespace NetworkToolBox {
         }
 
         private void GetAllNetworkInterfaces(string name = null) {
-            interfaces = NetworkInterface.GetAllNetworkInterfaces().Where(d => d.GetIPProperties().UnicastAddresses[1].Address.ToString() != "127.0.0.1").ToArray();
+            interfaces = NetworkInterface.GetAllNetworkInterfaces()
+                .Where(d => d.GetIPProperties().UnicastAddresses
+                .Where(s => s.Address.AddressFamily == AddressFamily.InterNetwork)
+                .Where(w => !w.Address.Equals(IPAddress.Loopback)).Count() > 0).ToArray();
             ifaces.ItemsSource = null;
             ifaces.ItemsSource = interfaces;
             if (name != null) {
@@ -270,7 +275,7 @@ namespace NetworkToolBox {
         private void LoadInterface(NetworkInterface @interface) {
             if (@interface == null) return;
             var ipp = @interface.GetIPProperties();
-            var addr = ipp.UnicastAddresses[1];
+            var addr = ipp.UnicastAddresses.Where(d => d.Address.AddressFamily == AddressFamily.InterNetwork).First();
             string mac = "";
             if (!string.IsNullOrEmpty(@interface.GetPhysicalAddress().ToString()))
                 mac = @interface.GetPhysicalAddress().ToString().Insert(10, "-").Insert(8, "-").Insert(6, "-").Insert(4, "-").Insert(2, "-");
@@ -298,7 +303,7 @@ namespace NetworkToolBox {
         }
 
         private void findInTree(string text) {
-            var selecteds = findInTree(tree, text).ToList();
+            var selecteds = findInTree(tree, text, true).ToList();
             if (selecteds.Count == 0) return;
             var index = selecteds.IndexOf(tree.SelectedItem as TreeViewItem);
             if (index >= 0 && index < selecteds.Count - 1) index++;
@@ -318,15 +323,21 @@ namespace NetworkToolBox {
             }
         }
 
-        private IEnumerable<TreeViewItem> findInTree(ItemsControl itemsControl, string str) {
-            if ((itemsControl is TreeViewItem) && (itemsControl as TreeViewItem).Header.ToString().Contains(str) && !((itemsControl as TreeViewItem).Header is Container)) {
-                yield return itemsControl as TreeViewItem;
+        private IEnumerable<TreeViewItem> findInTree(ItemsControl itemsControl, string str, bool ignoreCase) {
+            if (itemsControl is TreeViewItem) {
+                string text = (itemsControl as TreeViewItem).Header.ToString();
+                bool match = (ignoreCase && text.ToUpper().Contains(str.ToUpper())) || (!ignoreCase && text.Contains(str));
+                if (match && !((itemsControl as TreeViewItem).Header is Container)) {
+                    yield return itemsControl as TreeViewItem;
+                }
             }
             foreach (ItemsControl i in itemsControl.Items) {
-                if (i is TreeViewItem && (i as TreeViewItem).Header.ToString().Contains(str) && !((i as TreeViewItem).Header is Container)) {
+                string text = (i as TreeViewItem).Header.ToString();
+                bool match = (ignoreCase && text.ToUpper().Contains(str.ToUpper())) || (!ignoreCase && text.Contains(str));
+                if (match && !((i as TreeViewItem).Header is Container)) {
                     yield return i as TreeViewItem;
                 } else {
-                    var selecteds = findInTree(i, str);
+                    var selecteds = findInTree(i, str, ignoreCase);
                     foreach (var s in selecteds) {
                         yield return s;
                     }
