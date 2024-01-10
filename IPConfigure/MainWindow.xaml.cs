@@ -1,5 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Win32;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using SiretT;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -150,6 +152,21 @@ namespace NetworkToolBox {
                 tree.Items.Add(tvi);
             tvi.IsSelected = true;
         }
+
+        private void CreateEditableItem(ProfileNetwork profile, TreeViewItem parent = null) {
+            var tvi = new TreeViewItem {
+                Header = profile,
+                DataContext = profile,
+                ToolTip = profile.IPAddress,
+                HeaderTemplate = FindResource("TreeViewItemConnectionTemplate") as DataTemplate,
+            };
+            if (parent != null)
+                parent.Items.Add(tvi);
+            else
+                tree.Items.Add(tvi);
+            tvi.IsSelected = true;
+        }
+
 
         private void CreateEditableFolderItem(string name, TreeViewItem parent = null) {
             var container = new Container() {
@@ -549,6 +566,30 @@ namespace NetworkToolBox {
                 item.Dns2 = dns2.IPAddress.ToString();
                 item.IPAuto = !(bool)ipManRadio.IsChecked;
                 item.DnsAuto = !(bool)dnsManRadio.IsChecked;
+            }
+        }
+
+        private void importBtn_Click(object sender, RoutedEventArgs e) {
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = "Ini File|*.ini";
+            if ((bool)ofd.ShowDialog()) {
+                var ini = new IniFile(ofd.FileName);
+                if (ini.Contains("Options")) {
+                    var keys = ini.Keys.Where(d => d.Name != "Options");
+                    foreach (var i in keys) {
+                        ProfileNetwork profile = new ProfileNetwork() {
+                            Name = i.Name,
+                            IPAuto = (bool)ini.GetValue($"{i.Name}\\IpAuto", false),
+                            DnsAuto = (bool)ini.GetValue($"{i.Name}\\DnsAuto", false),
+                            IPAddress = ini.GetValue($"{i.Name}\\IpAddress").ToString(),
+                            Mask = ini.GetValue($"{i.Name}\\IpSubnet").ToString(),
+                            Gateway = ini.GetValue($"{i.Name}\\IpGateway").ToString(),
+                            Dns1 = ini.GetValue($"{i.Name}\\IpDnsPref").ToString(),
+                            Dns2 = ini.GetValue($"{i.Name}\\IpDnsAlt").ToString()
+                        };
+                        CreateEditableItem(profile);
+                    }
+                }
             }
         }
 

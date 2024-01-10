@@ -163,6 +163,9 @@
                 <Button Click="saveBtn_Click" ToolTip="Save">
                     <fonts:FontIcon Glyph="&#xE74E;" />
                 </Button>
+                <Button Click="importBtn_Click" ToolTip="Import from Simple IP Config">
+                    <fonts:FontIcon Glyph="&#xE8B5;" />
+                </Button>
                 <Button Click="clearBtn_Click" ToolTip="Clear">
                     <fonts:FontIcon Glyph="&#xEA99;" />
                 </Button>
