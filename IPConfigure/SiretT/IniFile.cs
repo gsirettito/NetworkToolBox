@@ -68,9 +68,8 @@ namespace SiretT {
                     string property = "";
                     string value;
                     if (!String.IsNullOrEmpty(line)) {
-                        while (line[0] == ' ') line = line.Remove(0, 1);
-                        while (line[line.Length - 1] == ' ') line = line.Remove(line.Length - 1, 1);
-                        if (Regex.IsMatch(line, @"^\[[_a-z][a-z0-9_]+\]$", RegexOptions.IgnoreCase)) {
+                        line = line.Trim();                        
+                        if (Regex.IsMatch(line, @"^\[[a-z0-9_. +\-*""'@#$%&]+\]$", RegexOptions.IgnoreCase)) {
                             key = line.Substring(1, line.Length - 2);
                             keys.Add(new IniKey(key));
                         } else if (Regex.IsMatch(line, "^[_a-z][a-z0-9_]+([ ]|)+=([ ]|)+.+$", RegexOptions.IgnoreCase)) {

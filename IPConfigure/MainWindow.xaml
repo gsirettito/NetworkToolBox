@@ -8,7 +8,7 @@
         xmlns:fonts="clr-namespace:SiretT.Fonts"
         mc:Ignorable="d"
         Icon="icon.ico"
-        Title="NetworkSet - v1.1.0.0" Height="560" Width="450" MinHeight="560" MinWidth="450">
+        Title="NetworkSet" Height="560" Width="450" MinHeight="560" MinWidth="450">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <Converters:EqualsToFalseConverter x:Key="EqualsToFalseConverter"/>

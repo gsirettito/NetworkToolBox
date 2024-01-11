@@ -10,6 +10,7 @@ using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Security.Principal;
 using System.Threading;
 using System.Windows;
@@ -25,12 +26,15 @@ namespace NetworkToolBox {
     /// </summary>
     public partial class MainWindow : Window {
         private NetworkInterface[] interfaces;
-        private DispatcherTimer dp;
         private DragAdorner adorner;
         private AdornerLayer layerTree;
 
         public MainWindow() {
             InitializeComponent();
+
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            var name = assembly.GetName();
+            Title = $"{name.Name} - v{name.Version.Major}.{name.Version.Minor}.{name.Version.Build}";
 
             ifaces.SelectionChanged += (s1, e1) => {
                 if (ifaces.SelectedItem == null) return;
@@ -581,11 +585,11 @@ namespace NetworkToolBox {
                             Name = i.Name,
                             IPAuto = (bool)ini.GetValue($"{i.Name}\\IpAuto", false),
                             DnsAuto = (bool)ini.GetValue($"{i.Name}\\DnsAuto", false),
-                            IPAddress = ini.GetValue($"{i.Name}\\IpAddress").ToString(),
-                            Mask = ini.GetValue($"{i.Name}\\IpSubnet").ToString(),
-                            Gateway = ini.GetValue($"{i.Name}\\IpGateway").ToString(),
-                            Dns1 = ini.GetValue($"{i.Name}\\IpDnsPref").ToString(),
-                            Dns2 = ini.GetValue($"{i.Name}\\IpDnsAlt").ToString()
+                            IPAddress = ini.GetValue($"{i.Name}\\IpAddress", (object)"").ToString(),
+                            Mask = ini.GetValue($"{i.Name}\\IpSubnet", (object)"").ToString(),
+                            Gateway = ini.GetValue($"{i.Name}\\IpGateway", (object)"").ToString(),
+                            Dns1 = ini.GetValue($"{i.Name}\\IpDnsPref", (object)"").ToString(),
+                            Dns2 = ini.GetValue($"{i.Name}\\IpDnsAlt", (object)"").ToString()
                         };
                         CreateEditableItem(profile);
                     }
@@ -684,14 +688,6 @@ namespace NetworkToolBox {
             layerTree = AdornerLayer.GetAdornerLayer(tree);
             layerTree.Add(adorner);
             adorner.UpdateVisibilty(true);
-        }
-
-        private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e) {
-            if (dp == null) return;
-            if ((sender as TabControl).SelectedIndex == 1) {
-                if (((ifaces.SelectedItem as NetworkInterface).OperationalStatus | OperationalStatus.Up) == OperationalStatus.Up)
-                    dp.Start();
-            } else dp.Stop();
         }
 
         private void tree_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e) {
